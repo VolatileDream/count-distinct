@@ -93,21 +93,23 @@ double alpha(uint8_t precision) {
 
 // It'd be nicer to use a tuple as a return value instead...
 double raw_estimate(count_t *c) {
-  double size = hll_size(c->precision);
-  double correction = alpha(c->precision);
+  const uint32_t size = hll_size(c->precision);
+  const double correction = alpha(c->precision);
 
   double sum = 0;
-  for (int i = 0; i < size; i++) {
-    uint8_t reg = c->zeros[i];
-    sum += pow(2, -reg);
+  for (uint32_t i = 0; i < size; i++) {
+    // HyperLogLog math from wikipedia is one indexed: +1 here.
+    uint8_t reg = c->zeros[i] + 1;
+    sum += 1.0 / (1 << reg);
   }
 
-  return size * size * correction * (1 / sum);
+  return size * size * correction / sum;
 }
 
 int zero_count(count_t *c) {
+  const uint32_t size = hll_size(c->precision);
   int zeros = 0;
-  for (uint8_t i = 0; i < hll_size(c->precision); i++) {
+  for (uint32_t i = 0; i < size; i++) {
     if (c->zeros[i] == 0) {
       zeros++;
     }
@@ -116,14 +118,19 @@ int zero_count(count_t *c) {
 }
 
 uint64_t hll_count(count_t *c) {
-  int size = hll_size(c->precision);
-  double raw = raw_estimate(c);
+  const uint32_t size = hll_size(c->precision);
+  const double raw = raw_estimate(c);
+  // fprintf(stderr, "raw estimate: %lf\n", raw);
   if (raw < 5/2 * size) {
     // Lower bound correction.
     int zeros = zero_count(c);
     if (zeros != 0) {
-      return size * log(size / zeros);
+      double est = size * log2(1.0 * size / zeros);
+      // fprintf(stderr, "low estimate with zeros: %d, E*=%lf\n", zeros, est);
+      return est;
     }
+  } else if (raw > (1.0 / 30) * pow(2, 32)) {
+    return - pow(2, 32) * log2(1 - raw / pow(2, 32));
   }
   // No upper bound correction because we use 64 bit registers.
   return raw;

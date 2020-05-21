@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef uint64_t (*hash_func)(const void *key, int len, uint32_t seed);
+typedef uint64_t (*hash_func)(const void *key, int len, uint64_t seed);
 typedef struct hyperloglog count_t;
 
 // Creates a new filter
