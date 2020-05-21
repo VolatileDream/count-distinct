@@ -1,5 +1,5 @@
 .gitignore
-CFLAGS += -std=c11 -Werror -Wall -Wextra -g3 -fsanitize=address
-CPPFLAGS += -std=c++11 -Werror -Wall -Wextra -g3 -fsanitize=address
-LIBS += -lm -fsanitize=address
+CFLAGS += -std=c11 -Werror -Wall -Wextra -O3
+CPPFLAGS += -std=c++11 -Werror -Wall -Wextra -O3
+LIBS += -lm -O3 -static
 CC = musl-gcc

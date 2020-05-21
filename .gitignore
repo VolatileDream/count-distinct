@@ -3,6 +3,7 @@
 ##### Do not edit.
 .tup
 /.gitignore
-/bloom-filter
+/app.o
+/count-distinct
 /libhyperloglog.o
 /main.o
