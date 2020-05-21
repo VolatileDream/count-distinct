@@ -1,0 +1,5 @@
+.gitignore
+CFLAGS += -std=c11 -Werror -Wall -Wextra -g3 -fsanitize=address
+CPPFLAGS += -std=c++11 -Werror -Wall -Wextra -g3 -fsanitize=address
+LIBS += -lm -fsanitize=address
+CC = musl-gcc
