@@ -39,7 +39,7 @@ uint32_t hll_size(uint8_t precision) {
   return 1 << precision;
 }
 
-count_t* hll_mk(hash_func func, uint8_t precision, uint64_t seed) {
+count_t* hll_init(hash_func func, uint8_t precision, uint64_t seed) {
   // The compiler will generate the struct such that .zeros is at the end and
   // aligned, we can place the allocated content of the array after it.
   count_t *c = (count_t*) malloc(sizeof(count_t) + hll_size(precision));
@@ -49,11 +49,6 @@ count_t* hll_mk(hash_func func, uint8_t precision, uint64_t seed) {
   c->zeros = (uint8_t*)(c + 1); // point to just after the struct.
   memset(c->zeros, 0, hll_size(c->precision));
   return c;
-}
-
-count_t* hll_init(hash_func func, uint8_t precision, const char* seed) {
-  uint64_t s = func(seed, strlen(seed), 0);
-  return hll_mk(func, precision, s);
 }
 
 void hll_del(count_t *c) {
@@ -145,7 +140,7 @@ count_t* hll_merge(count_t *c1, count_t *c2) {
     return false;
   }
 
-  count_t *out = hll_mk(c1->func, c1->precision, c1->seed);
+  count_t *out = hll_init(c1->func, c1->precision, c1->seed);
   for (uint32_t i = 0; i < hll_size(c1->precision); i++) {
     out->zeros[i] = max(c1->zeros[i], c2->zeros[i]);
   }
@@ -203,7 +198,7 @@ count_t* hll_read_from_file(FILE *file, hash_func hf) {
     return 0;
   }
 
-  count_t *c = hll_mk(hf, precision, seed);
+  count_t *c = hll_init(hf, precision, seed);
   for (uint64_t i=0; i < hll_size(precision) && !failure; i++) {
     failure = failure || read8(file, &c->zeros[i]);
   }

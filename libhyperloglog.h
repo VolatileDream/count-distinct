@@ -9,7 +9,7 @@ typedef uint64_t (*hash_func)(const void *key, int len, uint32_t seed);
 typedef struct hyperloglog count_t;
 
 // Creates a new filter
-count_t* hll_init(hash_func hf, uint8_t precision, const char* seed);
+count_t* hll_init(hash_func hf, uint8_t precision, uint64_t seed);
 // Deallocates the filter
 void hll_del(count_t *c);
 
