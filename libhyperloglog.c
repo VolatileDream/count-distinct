@@ -72,7 +72,7 @@ void hll_add(count_t *c, const void *key, int len) {
   // values zero and up. We bit-or with the mask to avoid
   // using those bits for the register computation and
   // leading zero count.
-  uint64_t value = __builtin_clz(hash | mask);
+  uint64_t value = __builtin_clz(hash | mask) + 1;
 
   c->zeros[reg] = max(c->zeros[reg], value);
 }
@@ -98,8 +98,7 @@ double raw_estimate(count_t *c) {
 
   double sum = 0;
   for (uint32_t i = 0; i < size; i++) {
-    // HyperLogLog math from wikipedia is one indexed: +1 here.
-    uint8_t reg = c->zeros[i] + 1;
+    uint8_t reg = c->zeros[i];
     sum += 1.0 / (1 << reg);
   }
 
