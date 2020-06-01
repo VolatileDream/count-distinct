@@ -41,7 +41,10 @@ bool app_create_counter(app_t *a, char *precision, char *seed) {
   if (a->counter) {
     return false;
   }
-  int p = atoi(precision);
+  int p = 15;
+  if (precision) {
+    p = atoi(precision);
+  }
   int s = 0;
   if (seed) {
     s = atoi(seed);

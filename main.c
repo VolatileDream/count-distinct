@@ -85,13 +85,8 @@ int run(app_t *app, int argc, char* argv[]) {
 
   // Attempt to create new filter.
   if (precision || seed) {
-    if (precision) {
-      if(!app_create_counter(app, precision, seed)) {
-        fprintf(stderr, "error creating filter: was a filter already loaded?\n");
-      }
-    } else {
-      fprintf(stderr, "precision required to create counter, but not provided\n");
-      return 7;
+    if(!app_create_counter(app, precision, seed)) {
+      fprintf(stderr, "error creating filter: was a filter already loaded?\n");
     }
   }
 
