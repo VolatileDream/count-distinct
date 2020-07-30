@@ -119,7 +119,9 @@ bool read_key(FILE *in, char *buf, uint32_t length, uint32_t *read) {
 }
 
 void app_count(app_t *a, FILE *in, FILE *out) {
-  if (!a->counter) { return; }
+  if (!a->counter) {
+    app_create_counter(*a, NULL, NULL);
+  }
 
   char buffer[MAX_KEY_LEN + 1] = {0};
   uint32_t length = 0;
