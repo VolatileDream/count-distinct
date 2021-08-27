@@ -1,4 +1,0 @@
-include_rules
-
-# Lots of fallthrough in the murmur hash code, ignore that warning.
-: foreach *.cpp |> $(CC) -I. $(CPPFLAGS) -Wno-implicit-fallthrough -c %f -o %o |> %B.o
