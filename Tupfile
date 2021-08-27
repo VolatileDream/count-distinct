@@ -1,4 +1,4 @@
 include_rules
 
-: foreach *.c |> $(CC) $(CFLAGS) -c %f -o %o |> %B.o
-: *.o lib/*.o |> $(CC) %f $(LIBS) -o %o |> count-distinct
+: foreach *.c |> !cc |>
+: $(TUP_ROOT)/third-party/libmurmurhash2.a *.o |> !prog |> count-distinct

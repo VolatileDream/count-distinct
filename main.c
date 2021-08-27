@@ -4,7 +4,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "./lib/MurmurHash2.h"
+#include "third-party/smhasher/src/MurmurHash2.h"
 
 void usage(char *arg0) {
   printf("usage: %s\n\n", arg0);

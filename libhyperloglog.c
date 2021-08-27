@@ -8,22 +8,6 @@
 // Handle endian conversion.
 #include <byteswap.h>
 #include <endian.h>
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-// Little Endian
-#define htobe64(x) bswap_64(x)
-#define htobe32(x) bswap_32(x)
-#define be32toh(x) bswap_32(x)
-#define be64toh(x) bswap_64(x)
-
-#else
-// Big Endian
-#define htobe64(x) (x)
-#define htobe32(x) (x)
-#define be32toh(x) (x)
-#define be64toh(x) (x)
-
-#endif /* __BYTE_ORDER == __LITTLE_ENDIAN */
-
 #define WORD_BIT_SIZE 64
 
 static const uint32_t MAGIC_HEADER = 0x0000411c;
