@@ -1,16 +1,12 @@
 #include "libhyperloglog.h"
+#include "libs/c/serde/libserde.h"
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-// Handle endian conversion.
-#include <byteswap.h>
-#include <endian.h>
-#define WORD_BIT_SIZE 64
-
-static const uint32_t MAGIC_HEADER = 0x0000411c;
+static const uint32_t MAGIC_HEADER = 0x8000411c;
 
 struct hyperloglog {
   hash_func func; // hash function pointer.
@@ -137,63 +133,39 @@ count_t* hll_merge(count_t *c1, count_t *c2) {
   return out;
 }
 
-// Returns true on failure.
-bool out8(FILE *f, uint8_t i) {
-  return fwrite(&i, sizeof(uint8_t), 1, f) != 1;
-}
-bool out32(FILE *f, uint32_t i) {
-  i = htobe32(i);
-  return fwrite(&i, sizeof(uint32_t), 1, f) != 1;
-}
-bool out64(FILE *f, uint64_t i) {
-  i = htobe64(i);
-  return fwrite(&i, sizeof(uint64_t), 1, f) != 1;
-}
-bool read8(FILE *f, uint8_t *i) {
-  size_t s = fread(i, sizeof(uint8_t), 1, f);
-  return s != 1;
-}
-bool read32(FILE *f, uint32_t *i) {
-  size_t s = fread(i, sizeof(uint32_t), 1, f);
-  *i = be32toh(*i);
-  return s != 1;
-}
-bool read64(FILE *f, uint64_t *i) {
-  size_t s = fread(i, sizeof(uint64_t), 1, f);
-  *i = be64toh(*i);
-  return s != 1;
-}
-
 bool hll_write_to_file(count_t *c, FILE *file) {
-  bool failure = false;
-  failure = failure || out32(file, MAGIC_HEADER);
-  failure = failure || out32(file, c->precision);
-  failure = failure || out64(file, c->seed);
-  for (uint64_t i=0; i < hll_size(c->precision) && !failure; i++) {
-    failure = failure || out8(file, c->zeros[i]);
+  bool ok = true;
+  ok = ok && serde_write(file, MAGIC_HEADER);
+  ok = ok && serde_write(file, c->seed);
+  ok = ok && serde_write(file, c->precision);
+
+  for (uint64_t i=0; i < hll_size(c->precision) && ok; i++) {
+    ok = ok && serde_write(file, c->zeros[i]);
   }
-  return !failure;
+
+  return ok;
 }
 
 count_t* hll_read_from_file(FILE *file, hash_func hf) {
   uint32_t header = 0;
   uint64_t seed = 0;
-  uint32_t precision = 0;
-  bool failure = false;
-  failure = failure || read32(file, &header);
-  failure = failure || read32(file, &precision);
-  failure = failure || read64(file, &seed);
+  uint8_t precision = 0;
 
-  if (failure || header != MAGIC_HEADER) {
+  bool ok = true;
+  ok = ok && serde_read(file, &header);
+  ok = ok && serde_read(file, &seed);
+  ok = ok && serde_read(file, &precision);
+
+  if (!ok || header != MAGIC_HEADER) {
     return 0;
   }
 
   count_t *c = hll_init(hf, precision, seed);
-  for (uint64_t i=0; i < hll_size(precision) && !failure; i++) {
-    failure = failure || read8(file, &c->zeros[i]);
+  for (uint64_t i=0; i < hll_size(precision) && ok; i++) {
+    ok = ok && serde_read(file, &c->zeros[i]);
   }
 
-  if (failure) {
+  if (!ok) {
     hll_del(c);
     return 0;
   }
