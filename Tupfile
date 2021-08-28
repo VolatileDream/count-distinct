@@ -1,4 +1,4 @@
 include_rules
 
 : foreach *.c |> !cc |>
-: $(TUP_ROOT)/third-party/libmurmurhash2.a $(TUP_ROOT)/libs/c/serde/libserde.o *.o |> !prog |> count-distinct
+: $(TUP_ROOT)/third-party/libmurmurhash2.a $(TUP_ROOT)/data/serde/libserde.o *.o |> !prog |> count-distinct
