@@ -1,6 +1,0 @@
-include_rules
-
-: foreach *.c |> !cc |>
-: $(TUP_ROOT)/third-party/libmurmurhash2.o $(TUP_ROOT)/data/serde/libserde.o *.o |> !prog |> count-distinct
-
-: count-distinct |> !bin |>
